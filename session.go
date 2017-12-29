@@ -99,6 +99,9 @@ func Check(key string) (d Data, err error) {
 	d = Get(key[0:32])
 	if d.ID == 0 {
 		err = errors.New("Сессия не найдена")
+		for k, v := range obj.data {
+			log.Println(k, v)
+		}
 		return
 	}
 
