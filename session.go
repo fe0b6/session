@@ -74,6 +74,9 @@ func Create(id int) (cookie string, err error) {
 
 	k := strconv.FormatInt(int64(id), 32) + strconv.FormatInt(time.Now().UnixNano(), 32) +
 		strconv.FormatInt(rand.Int63(), 32)
+	m := md5.New()
+	m.Write([]byte(k))
+	k = hex.EncodeToString(m.Sum(nil))
 
 	// Проверяем что такой сессии еще нет
 	if Exist(k) {
@@ -99,9 +102,6 @@ func Check(key string) (d Data, err error) {
 	d = Get(key[0:32])
 	if d.ID == 0 {
 		err = errors.New("Сессия не найдена")
-		for k, v := range obj.data {
-			log.Println(k, v)
-		}
 		return
 	}
 
