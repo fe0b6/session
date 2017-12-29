@@ -17,14 +17,29 @@ var (
 )
 
 // Init - инициализация
-func Init(p Param) {
+func Init(p Param) (exitChan chan bool) {
 	obj.param = p
 
 	if obj.param.WriteTime == 0 {
 		obj.param.WriteTime = 60
 	}
 
+	exitChan = make(chan bool)
+
+	go waitExit(exitChan)
+
 	obj.readFile()
+
+	return
+}
+
+// Ждем сигнал о выходе
+func waitExit(exitChan chan bool) {
+	_ = <-exitChan
+
+	obj.writeFile(true)
+
+	exitChan <- true
 }
 
 // Get - получаем сессию
@@ -50,7 +65,7 @@ func Set(key string, id int) {
 	obj.Unlock()
 
 	// Пишем изменения в файл
-	obj.writeFile()
+	obj.writeFile(false)
 }
 
 // Delete - удаяем сессии
@@ -66,7 +81,7 @@ func Delete(uid int) {
 	obj.Unlock()
 
 	// Пишем изменения в файл
-	obj.writeFile()
+	obj.writeFile(false)
 }
 
 // Create - Создаем сессию

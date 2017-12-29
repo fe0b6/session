@@ -37,10 +37,10 @@ func (obj *object) readFile() {
 }
 
 // Пишем сессии в файл
-func (obj *object) writeFile() {
+func (obj *object) writeFile(force bool) {
 	// Проверяем как давно записывали, и если недавно то не обновляем ничего
 	obj.Fsync.RLock()
-	if obj.writeTime.Add(obj.param.WriteTime * time.Minute).After(time.Now()) {
+	if !force && obj.writeTime.Add(obj.param.WriteTime*time.Minute).After(time.Now()) {
 		obj.Fsync.RUnlock()
 		return
 	}
@@ -95,6 +95,6 @@ func (obj *object) checkExpires() {
 		obj.Unlock()
 
 		// Обновляем файл сессий
-		obj.writeFile()
+		obj.writeFile(false)
 	}
 }
