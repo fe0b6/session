@@ -23,6 +23,8 @@ func (obj *object) readFile() {
 			log.Fatalln("[fatal]", "decode:", err)
 			return
 		}
+	} else {
+		obj.data = make(map[string]Data)
 	}
 
 	// Запускаем таймер проверки устаревания сессий
