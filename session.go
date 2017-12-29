@@ -70,7 +70,7 @@ func Delete(uid int) {
 }
 
 // Create - Создаем сессию
-func Create(id int) (cookie string, err string) {
+func Create(id int) (cookie string, err error) {
 
 	k := strconv.FormatInt(int64(id), 32) + strconv.FormatInt(time.Now().UnixNano(), 32) +
 		strconv.FormatInt(rand.Int63(), 32)
