@@ -59,7 +59,7 @@ func Exist(key string) (ok bool) {
 }
 
 // Set - Вставка новой сессии
-func Set(key string, id int) {
+func Set(key string, id int64) {
 	obj.Lock()
 	obj.data[key] = Data{ID: id, Time: time.Now()}
 	obj.Unlock()
@@ -69,7 +69,7 @@ func Set(key string, id int) {
 }
 
 // Delete - удаяем сессии
-func Delete(uid int) {
+func Delete(uid int64) {
 	obj.Lock()
 	// Ищем сессии
 	for k, v := range obj.data {
@@ -85,7 +85,7 @@ func Delete(uid int) {
 }
 
 // Create - Создаем сессию
-func Create(id int) (cookie string, err error) {
+func Create(id int64) (cookie string, err error) {
 
 	k := strconv.FormatInt(int64(id), 32) + strconv.FormatInt(time.Now().UnixNano(), 32) +
 		strconv.FormatInt(rand.Int63(), 32)

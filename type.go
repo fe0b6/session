@@ -15,7 +15,7 @@ type object struct {
 
 // Data - Объект сессии
 type Data struct {
-	ID   int
+	ID   int64
 	Time time.Time
 }
 
