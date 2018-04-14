@@ -111,7 +111,6 @@ func Delete(uid int64) {
 		})
 
 		for _, k := range keys {
-			log.Println(k)
 			cdb.Cdb.Del(k)
 		}
 		return
