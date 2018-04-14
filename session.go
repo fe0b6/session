@@ -86,7 +86,7 @@ func Exist(key string) (ok bool) {
 // Set - Вставка новой сессии
 func Set(key string, id int64) {
 	if obj.param.Type == "cdb" {
-		cdb.Cdb.SetObjEx(prefix+key, Data{ID: id, Time: time.Now()}, 86400*30)
+		cdb.Cdb.SetObjEx(prefix+key, Data{ID: id, Time: time.Now()}, int(obj.param.InactiveTime))
 		return
 	}
 
