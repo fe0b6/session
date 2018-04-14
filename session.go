@@ -105,6 +105,8 @@ func Delete(uid int64) {
 			var s Data
 			tools.FromGob(&s, o.Data)
 			if s.ID == uid {
+				log.Println(k, uid)
+
 				cdb.Cdb.Del(k)
 			}
 		})
