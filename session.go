@@ -10,7 +10,14 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+
+	"github.com/fe0b6/ramstore"
+	"github.com/fe0b6/tools"
+
+	"github.com/fe0b6/cdb"
 )
+
+const prefix = "session:"
 
 var (
 	obj object
@@ -28,8 +35,10 @@ func Init(p Param) (exitChan chan bool) {
 
 	go waitExit(exitChan)
 
-	obj.readFile()
-
+	if p.Type == "cdb" {
+	} else {
+		obj.readFile()
+	}
 	return
 }
 
@@ -37,13 +46,21 @@ func Init(p Param) (exitChan chan bool) {
 func waitExit(exitChan chan bool) {
 	_ = <-exitChan
 
-	obj.writeFile(true)
+	if obj.param.Type == "cdb" {
+	} else {
+		obj.writeFile(true)
+	}
 
 	exitChan <- true
 }
 
 // Get - получаем сессию
 func Get(key string) (s Data) {
+	if obj.param.Type == "cdb" {
+		cdb.Cdb.GetObj(prefix+key, &s)
+		return
+	}
+
 	obj.RLock()
 	s = obj.data[key]
 	obj.RUnlock()
@@ -52,6 +69,14 @@ func Get(key string) (s Data) {
 
 // Exist - проверка есть ли такой ключ
 func Exist(key string) (ok bool) {
+	if obj.param.Type == "cdb" {
+		_, err := cdb.Cdb.Get(prefix + key)
+		if err == nil {
+			ok = true
+		}
+		return
+	}
+
 	obj.RLock()
 	_, ok = obj.data[key]
 	obj.RUnlock()
@@ -60,6 +85,11 @@ func Exist(key string) (ok bool) {
 
 // Set - Вставка новой сессии
 func Set(key string, id int64) {
+	if obj.param.Type == "cdb" {
+		cdb.Cdb.SetObjEx(prefix+key, Data{ID: id, Time: time.Now()}, 86400*30)
+		return
+	}
+
 	obj.Lock()
 	obj.data[key] = Data{ID: id, Time: time.Now()}
 	obj.Unlock()
@@ -70,6 +100,17 @@ func Set(key string, id int64) {
 
 // Delete - удаяем сессии
 func Delete(uid int64) {
+	if obj.param.Type == "cdb" {
+		cdb.Cdb.Search(prefix, func(k string, o ramstore.Obj) {
+			var s Data
+			tools.FromGob(&s, o.Data)
+			if s.ID == uid {
+				cdb.Cdb.Del(k)
+			}
+		})
+		return
+	}
+
 	obj.Lock()
 	// Ищем сессии
 	for k, v := range obj.data {

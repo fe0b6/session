@@ -25,4 +25,5 @@ type Param struct {
 	InactiveTime int64
 	WriteTime    time.Duration
 	Secret       string
+	Type         string
 }
