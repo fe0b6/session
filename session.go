@@ -101,18 +101,13 @@ func Set(key string, id int64) {
 // Delete - удаяем сессии
 func Delete(uid int64) {
 	if obj.param.Type == "cdb" {
-		keys := []string{}
 		cdb.Cdb.Search(prefix, func(k string, o ramstore.Obj) {
 			var s Data
 			tools.FromGob(&s, o.Data)
 			if s.ID == uid {
-				keys = append(keys, k)
+				cdb.Cdb.Del(k)
 			}
 		})
-
-		for _, k := range keys {
-			cdb.Cdb.Del(k)
-		}
 		return
 	}
 
