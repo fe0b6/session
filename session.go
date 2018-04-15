@@ -84,9 +84,13 @@ func Exist(key string) (ok bool) {
 }
 
 // Set - Вставка новой сессии
-func Set(key string, id int64) {
+func Set(key string, id int64) (err error) {
 	if obj.param.Type == "cdb" {
-		cdb.Cdb.SetObjEx(prefix+key, Data{ID: id, Time: time.Now()}, int(obj.param.InactiveTime))
+		err = cdb.Cdb.SetObjEx(prefix+key, Data{ID: id, Time: time.Now()}, int(obj.param.InactiveTime))
+		if err != nil {
+			log.Println("[error]", err)
+			return
+		}
 		return
 	}
 
@@ -96,6 +100,8 @@ func Set(key string, id int64) {
 
 	// Пишем изменения в файл
 	obj.writeFile(false)
+
+	return
 }
 
 // Delete - удаяем сессии
@@ -141,7 +147,11 @@ func Create(id int64) (cookie string, err error) {
 	}
 
 	// Сохраняем сессию
-	Set(k, id)
+	err = Set(k, id)
+	if err != nil {
+		log.Println("[error]", err)
+		return
+	}
 
 	// Создаем подпись для сессии
 	sign := Sign(k)
