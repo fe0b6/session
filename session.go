@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fe0b6/ramstore"
 	"github.com/fe0b6/tools"
 
 	"github.com/fe0b6/cdb"
@@ -70,10 +69,13 @@ func Get(key string) (s Data) {
 // Exist - проверка есть ли такой ключ
 func Exist(key string) (ok bool) {
 	if obj.param.Type == "cdb" {
-		_, err := cdb.Cdb.Get(prefix + key)
-		if err == nil {
-			ok = true
+		var err error
+		ok, err = cdb.Cdb.Exists(prefix + key)
+		if err != nil {
+			log.Println("[error]", err)
+			return
 		}
+
 		return
 	}
 
@@ -107,9 +109,9 @@ func Set(key string, id int64) (err error) {
 // Delete - удаяем сессии
 func Delete(uid int64) {
 	if obj.param.Type == "cdb" {
-		cdb.Cdb.Search(prefix, func(k string, o ramstore.Obj) {
+		cdb.Cdb.Search(prefix, func(k string, b []byte) {
 			var s Data
-			tools.FromGob(&s, o.Data)
+			tools.FromGob(&s, b)
 			if s.ID == uid {
 				cdb.Cdb.Del(k)
 			}
